@@ -1,5 +1,23 @@
 // Complete Pakistan Provinces, Major Cities, and Popular Areas Dataset
 export const PAKISTAN_LOCATIONS = {
+  popularCities: [
+    'Lahore',
+    'Karachi',
+    'Islamabad',
+    'Rawalpindi',
+    'Faisalabad',
+    'Multan',
+    'Peshawar',
+    'Quetta',
+    'Sialkot',
+    'Gujranwala',
+    'Hyderabad',
+    'Bahawalpur',
+    'Sargodha',
+    'Abbottabad',
+    'Sukkur',
+    'Sahiwal'
+  ],
   provinces: [
     { id: 'punjab', name: 'Punjab' },
     { id: 'sindh', name: 'Sindh' },

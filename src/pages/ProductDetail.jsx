@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../lib/store';
-import { Rating } from '../components/ui/Rating';
 import {
   Heart,
   ShoppingCart,
@@ -30,64 +29,83 @@ import { PAKISTAN_LOCATIONS } from '../data/pk-locations';
 import { MARKAZ_PRODUCTS_500 } from '../data/markaz-products.js';
 import { ProductCard } from '../components/product/ProductCard';
 
+const POPULAR_CITIES = PAKISTAN_LOCATIONS?.popularCities || [
+  'Lahore',
+  'Karachi',
+  'Islamabad',
+  'Rawalpindi',
+  'Faisalabad',
+  'Multan',
+  'Peshawar',
+  'Quetta',
+  'Sialkot',
+  'Gujranwala'
+];
+
 export const ProductDetail = () => {
   const { productSlug } = useParams();
   const navigate = useNavigate();
-  const products = useStore((state) => state.products);
+  const products = useStore((state) => state.products || []);
+  const wishlist = useStore((state) => state.wishlist || []);
   const addToCart = useStore((state) => state.addToCart);
   const toggleWishlist = useStore((state) => state.toggleWishlist);
-  const isInWishlist = useStore((state) => state.isInWishlist);
   const addRecentlyViewed = useStore((state) => state.addRecentlyViewed);
-  const setCartDrawerOpen = useStore((state) => state.setCartDrawerOpen);
   const addToast = useStore((state) => state.addToast);
 
-  // Robust product lookup by slug or ID across store & catalog
+  // Ultra-resilient product lookup
   const product = useMemo(() => {
     if (!productSlug) return products[0] || MARKAZ_PRODUCTS_500[0];
     const target = decodeURIComponent(productSlug).toLowerCase().trim();
-    const allProducts = (products && products.length > 0) ? products : MARKAZ_PRODUCTS_500;
+    const catalog = (products && products.length > 0) ? products : MARKAZ_PRODUCTS_500;
     
     // 1. Exact slug or ID match
-    let found = allProducts.find((p) => p.slug.toLowerCase() === target || p.id.toLowerCase() === target);
+    let found = catalog.find((p) => p.slug?.toLowerCase() === target || p.id?.toLowerCase() === target);
     if (found) return found;
 
     // 2. Lookup in static 500 catalog
-    found = MARKAZ_PRODUCTS_500.find((p) => p.slug.toLowerCase() === target || p.id.toLowerCase() === target);
+    found = MARKAZ_PRODUCTS_500.find((p) => p.slug?.toLowerCase() === target || p.id?.toLowerCase() === target);
     if (found) return found;
 
     // 3. Match numeric ID extracted from slug (e.g. -71 -> mkz-prod-71)
     const idMatch = target.match(/-(\d+)$/);
     if (idMatch) {
       const numericId = `mkz-prod-${idMatch[1]}`;
-      found = allProducts.find((p) => p.id === numericId) || MARKAZ_PRODUCTS_500.find((p) => p.id === numericId);
+      found = catalog.find((p) => p.id === numericId) || MARKAZ_PRODUCTS_500.find((p) => p.id === numericId);
       if (found) return found;
     }
 
-    // 4. Partial slug contains
-    found = allProducts.find((p) => p.slug.toLowerCase().includes(target) || target.includes(p.slug.toLowerCase()));
+    // 4. Partial slug match
+    found = catalog.find((p) => p.slug?.toLowerCase().includes(target) || target.includes(p.slug?.toLowerCase()));
     if (found) return found;
 
-    return allProducts[0] || MARKAZ_PRODUCTS_500[0];
+    return catalog[0] || MARKAZ_PRODUCTS_500[0];
   }, [products, productSlug]);
 
   const [selectedImageIdx, setSelectedImageIdx] = useState(0);
-  const [selectedVariant, setSelectedVariant] = useState(product?.variants?.[0] || null);
+  const [selectedVariant, setSelectedVariant] = useState(null);
   const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState('overview');
   const [selectedCity, setSelectedCity] = useState('Lahore');
   const [isCopied, setIsCopied] = useState(false);
 
-  // Markaz Reseller Profit Calculator State
-  const [resellerPrice, setResellerPrice] = useState(
-    product ? Math.round(product.price * 1.35) : 2500
-  );
+  // Safe images array
+  const productImages = useMemo(() => {
+    if (!product) return ['https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=600'];
+    if (Array.isArray(product.images) && product.images.length > 0) return product.images;
+    if (typeof product.image === 'string') return [product.image];
+    return ['https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=600'];
+  }, [product]);
+
+  // Reseller profit state
+  const [resellerPrice, setResellerPrice] = useState(2500);
 
   useEffect(() => {
     if (product) {
-      addRecentlyViewed(product);
+      if (typeof addRecentlyViewed === 'function') {
+        addRecentlyViewed(product);
+      }
       setSelectedImageIdx(0);
       setSelectedVariant(product.variants?.[0] || null);
-      setResellerPrice(Math.round(product.price * 1.35));
+      setResellerPrice(Math.round((product.price || 1500) * 1.35));
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [product, addRecentlyViewed]);
@@ -103,7 +121,8 @@ export const ProductDetail = () => {
     );
   }
 
-  const currentPrice = selectedVariant?.price || product.price;
+  const isSavedInWishlist = wishlist.includes(product.id);
+  const currentPrice = selectedVariant?.price || product.price || 1499;
   const comparePrice = selectedVariant?.compareAtPrice || product.compareAtPrice;
   const discountPercent =
     comparePrice && comparePrice > currentPrice
@@ -114,21 +133,21 @@ export const ProductDetail = () => {
   const calculatedResellerProfit = Math.max(0, resellerPrice - currentPrice);
 
   // Related products from same category
-  const relatedProducts = (products.length > 0 ? products : MARKAZ_PRODUCTS_500)
+  const allProductsList = (products && products.length > 0) ? products : MARKAZ_PRODUCTS_500;
+  const relatedProducts = allProductsList
     .filter((p) => p.categorySlug === product.categorySlug && p.id !== product.id)
     .slice(0, 4);
 
   const handleAddToCart = () => {
-    addToCart(product, selectedVariant, quantity);
-    addToast?.({
-      title: 'Added to Cart',
-      message: `${product.title} has been added to your bag.`,
-      type: 'success'
-    });
+    if (typeof addToCart === 'function') {
+      addToCart(product, selectedVariant, quantity);
+    }
   };
 
   const handleBuyNow = () => {
-    addToCart(product, selectedVariant, quantity);
+    if (typeof addToCart === 'function') {
+      addToCart(product, selectedVariant, quantity);
+    }
     navigate('/checkout');
   };
 
@@ -142,17 +161,19 @@ export const ProductDetail = () => {
       navigator.clipboard.writeText(window.location.href);
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2500);
-      addToast?.({
-        title: 'Link Copied',
-        message: 'Product link copied to clipboard.',
-        type: 'success'
-      });
+      if (typeof addToast === 'function') {
+        addToast({
+          title: 'Link Copied',
+          message: 'Product link copied to clipboard.',
+          type: 'success'
+        });
+      }
     }
   };
 
   const handleWhatsAppOrder = () => {
     const text = encodeURIComponent(
-      `Assalam o Alaikum! I want to order this product from FTH Mart (Markaz Sourcing):\n\n*Product:* ${product.title}\n*SKU:* ${product.sku}\n*Price:* ${formatPKR(currentPrice)}\n*Quantity:* ${quantity}\n*Variant:* ${selectedVariant?.name || 'Standard'}\n*Delivery City:* ${selectedCity}\n*Payment:* Cash on Delivery (COD)\n\nPlease confirm my order!`
+      `Assalam o Alaikum! I want to order this product from FTH Mart (Markaz Sourcing):\n\n*Product:* ${product.title}\n*SKU:* ${product.sku}\n*Price:* ${formatPKR(currentPrice)}\n*Quantity:* ${quantity}\n*Variant:* ${selectedVariant?.name || selectedVariant?.title || 'Standard'}\n*Delivery City:* ${selectedCity}\n*Payment:* Cash on Delivery (COD)\n\nPlease confirm my order!`
     );
     window.open(`https://wa.me/923001234567?text=${text}`, '_blank');
   };
@@ -182,7 +203,7 @@ export const ProductDetail = () => {
         <div className="lg:col-span-6 bg-white rounded-[28px] p-6 shadow-pillow border border-[#ebebeb]/60 space-y-4">
           <div className="relative aspect-square rounded-[20px] overflow-hidden bg-[#f2f4f5] border border-[#ebebeb]/60">
             <img
-              src={product.images?.[selectedImageIdx] || 'https://placehold.co/600'}
+              src={productImages[selectedImageIdx] || productImages[0]}
               alt={product.title}
               className="w-full h-full object-cover transition-all duration-300"
             />
@@ -197,21 +218,23 @@ export const ProductDetail = () => {
           </div>
 
           {/* Thumbnail Carousel */}
-          <div className="flex items-center gap-3 overflow-x-auto no-scrollbar py-1">
-            {product.images?.map((img, idx) => (
-              <button
-                key={idx}
-                onClick={() => setSelectedImageIdx(idx)}
-                className={`w-16 h-16 rounded-[16px] overflow-hidden flex-shrink-0 border-2 transition-all ${
-                  selectedImageIdx === idx
-                    ? 'border-[#5433eb] shadow-violet-glow scale-102'
-                    : 'border-transparent opacity-70 hover:opacity-100 bg-[#f2f4f5]'
-                }`}
-              >
-                <img src={img} alt="Thumb" className="w-full h-full object-cover" />
-              </button>
-            ))}
-          </div>
+          {productImages.length > 1 && (
+            <div className="flex items-center gap-3 overflow-x-auto no-scrollbar py-1">
+              {productImages.map((img, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setSelectedImageIdx(idx)}
+                  className={`w-16 h-16 rounded-[16px] overflow-hidden flex-shrink-0 border-2 transition-all ${
+                    selectedImageIdx === idx
+                      ? 'border-[#5433eb] shadow-violet-glow scale-102'
+                      : 'border-transparent opacity-70 hover:opacity-100 bg-[#f2f4f5]'
+                  }`}
+                >
+                  <img src={img} alt="Thumb" className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Right Product Buy Box */}
@@ -231,11 +254,11 @@ export const ProductDetail = () => {
                   <Share2 className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={() => toggleWishlist(product.id)}
+                  onClick={() => typeof toggleWishlist === 'function' && toggleWishlist(product.id)}
                   className="p-2 rounded-full hover:bg-[#f2f4f5] text-[#787574] hover:text-rose-600 transition-colors"
                   title="Wishlist"
                 >
-                  <Heart className={`w-4 h-4 ${isInWishlist(product.id) ? 'fill-rose-500 text-rose-500' : ''}`} />
+                  <Heart className={`w-4 h-4 ${isSavedInWishlist ? 'fill-rose-500 text-rose-500' : ''}`} />
                 </button>
               </div>
             </div>
@@ -249,7 +272,7 @@ export const ProductDetail = () => {
             <div className="flex items-center gap-3 text-xs border-b border-[#ebebeb] pb-4">
               <div className="flex items-center text-amber-400 font-bold gap-1">
                 <Star className="w-4 h-4 fill-amber-400" />
-                <span className="text-black">{product.rating}</span>
+                <span className="text-black">{product.rating || '4.8'}</span>
               </div>
               <span className="text-[#787574]">({product.reviewsCount || 142} reviews)</span>
               <span className="text-[#acb0aa]">•</span>
@@ -322,7 +345,7 @@ export const ProductDetail = () => {
             {product.variants?.length > 0 && (
               <div className="space-y-2">
                 <span className="text-xs font-semibold text-black tracking-tight-body">
-                  Select Option: <strong className="text-[#5433eb]">{selectedVariant?.name || selectedVariant?.title}</strong>
+                  Select Option: <strong className="text-[#5433eb]">{selectedVariant?.name || selectedVariant?.title || 'Standard'}</strong>
                 </span>
                 <div className="flex flex-wrap gap-2">
                   {product.variants.map((v) => (
@@ -376,7 +399,7 @@ export const ProductDetail = () => {
                   onChange={(e) => setSelectedCity(e.target.value)}
                   className="text-xs font-bold text-[#5433eb] bg-[#f2f4f5] rounded-full px-3 py-1 focus:outline-none cursor-pointer"
                 >
-                  {PAKISTAN_LOCATIONS.popularCities.map((city) => (
+                  {POPULAR_CITIES.map((city) => (
                     <option key={city} value={city}>{city}, Pakistan</option>
                   ))}
                 </select>
@@ -397,7 +420,7 @@ export const ProductDetail = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
                 onClick={handleAddToCart}
-                className="w-full py-3.5 bg-black hover:bg-[#222222] text-white rounded-full text-xs sm:text-sm font-semibold transition-all shadow-sm flex items-center justify-center gap-2 active:scale-95"
+                className="w-full py-3.5 bg-black hover:bg-[#222222] text-white rounded-full text-xs sm:text-sm font-semibold transition-all shadow-sm flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
               >
                 <ShoppingCart className="w-4 h-4" />
                 <span>Add to Cart</span>
@@ -405,7 +428,7 @@ export const ProductDetail = () => {
 
               <button
                 onClick={handleBuyNow}
-                className="w-full py-3.5 bg-[#5433eb] hover:bg-[#4524db] text-white rounded-full text-xs sm:text-sm font-semibold transition-all shadow-violet-glow flex items-center justify-center gap-2 active:scale-95"
+                className="w-full py-3.5 bg-[#5433eb] hover:bg-[#4524db] text-white rounded-full text-xs sm:text-sm font-semibold transition-all shadow-violet-glow flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
               >
                 <Zap className="w-4 h-4 fill-white" />
                 <span>Buy Now (Cash on Delivery)</span>
@@ -415,7 +438,7 @@ export const ProductDetail = () => {
             {/* 1-Click WhatsApp Order Placement */}
             <button
               onClick={handleWhatsAppOrder}
-              className="w-full py-3 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-full text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-sm active:scale-95"
+              className="w-full py-3 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-full text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-sm active:scale-95 cursor-pointer"
             >
               <MessageCircle className="w-4 h-4" />
               <span>Order on WhatsApp (Cash on Delivery)</span>
@@ -469,7 +492,7 @@ export const ProductDetail = () => {
               </div>
               <div className="flex justify-between py-1">
                 <span>Stock Status:</span>
-                <span className="font-bold text-emerald-600">In Stock ({product.stock} units)</span>
+                <span className="font-bold text-emerald-600">In Stock ({product.stock || 80} units)</span>
               </div>
             </div>
           </div>
