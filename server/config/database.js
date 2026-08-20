@@ -9,12 +9,12 @@ const DATA_DIR = path.join(__dirname, '../data');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
 
 // Import Initial Seed Catalogues
-import { MARKAZ_PRODUCTS_500 } from '../../src/data/markaz-products.js';
+import { MARKAZ_PRODUCTS_500 } from '../data/seed-products.js';
 import {
   INITIAL_CATEGORIES,
   INITIAL_COUPONS,
   INITIAL_ORDERS
-} from '../../src/data/mock-data.js';
+} from '../data/seed-data.js';
 
 // Default Admin & Customer users
 const DEFAULT_USERS = [

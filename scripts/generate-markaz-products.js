@@ -269,10 +269,12 @@ while (products.length < totalTarget) {
 }
 
 // Generate the output file
-const outputPath = path.join(__dirname, '../src/data/markaz-products.js');
+const outputPath1 = path.join(__dirname, '../src/data/markaz-products.js');
+const outputPath2 = path.join(__dirname, '../server/data/seed-products.js');
 const fileContent = `// Auto-generated 500 Markaz Dropshipping Products Catalogue
 export const MARKAZ_PRODUCTS_500 = ${JSON.stringify(products, null, 2)};
 `;
 
-fs.writeFileSync(outputPath, fileContent, 'utf-8');
-console.log(`Successfully generated ${products.length} Markaz products at ${outputPath}`);
+fs.writeFileSync(outputPath1, fileContent, 'utf-8');
+fs.writeFileSync(outputPath2, fileContent, 'utf-8');
+console.log(`Successfully generated ${products.length} Markaz products at both ${outputPath1} and ${outputPath2}`);

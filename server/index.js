@@ -70,8 +70,21 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start Server
-app.listen(PORT, () => {
+// Root Welcome Route
+app.get('/', (req, res) => {
+  res.json({
+    status: 'online',
+    message: '🚀 FTH Mart Backend REST API is Running Successfully on Railway!',
+    healthCheck: '/api/health',
+    productsApi: '/api/products',
+    categoriesApi: '/api/categories',
+    totalProducts: db.data.products?.length || 0,
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Start Server (Bind to 0.0.0.0 for Railway / Cloud deployment)
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`=================================================`);
   console.log(`🚀 FTH Mart Backend Server running on port ${PORT}`);
   console.log(`🔗 Health Check: http://localhost:${PORT}/api/health`);
