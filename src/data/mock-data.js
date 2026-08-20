@@ -134,8 +134,9 @@ export const INITIAL_CATEGORIES = [
   }
 ];
 
-// Clean Products Array (Ready for user's own products)
-export const INITIAL_PRODUCTS = [];
+import { MARKAZ_PRODUCTS_500 } from './markaz-products.js';
+
+export const INITIAL_PRODUCTS = MARKAZ_PRODUCTS_500;
 
 export const INITIAL_COUPONS = [
   {

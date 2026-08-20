@@ -73,7 +73,12 @@ class Database {
       try {
         const fileContent = fs.readFileSync(DB_FILE, 'utf-8');
         const parsed = JSON.parse(fileContent);
-        this.data = { ...this.data, ...parsed };
+        if (parsed.products && parsed.products.length > 0) {
+          this.data = { ...this.data, ...parsed };
+        } else {
+          this.data.products = MARKAZ_PRODUCTS_500;
+          this.save();
+        }
       } catch (err) {
         console.error('Error reading db.json, re-initializing seed:', err);
         this.save();
