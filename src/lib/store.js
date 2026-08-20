@@ -548,17 +548,14 @@ export const useStore = create(
       }
     }),
     {
-      name: 'fth_mart_storage_v4',
-      version: 4,
+      name: 'fth_mart_storage_v5',
+      version: 5,
       migrate: (persistedState) => {
-        if (!persistedState || !persistedState.products || persistedState.products.length < 100) {
-          return {
-            ...persistedState,
-            products: INITIAL_PRODUCTS,
-            categories: INITIAL_CATEGORIES
-          };
-        }
-        return persistedState;
+        return {
+          ...persistedState,
+          products: [],
+          categories: INITIAL_CATEGORIES
+        };
       },
       partialize: (state) => ({
         user: state.user,

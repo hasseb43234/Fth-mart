@@ -1,4 +1,4 @@
-// Standalone seed data for backend server
+// Standalone categories & configuration for backend server
 
 export const INITIAL_CATEGORIES = [
   {
@@ -7,7 +7,7 @@ export const INITIAL_CATEGORIES = [
     name: 'Electronics & Smart Tech',
     icon: 'Cpu',
     image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=60',
-    itemCount: 1420,
+    itemCount: 0,
     featured: true,
     subcategories: [
       { id: 'sub-earbuds', slug: 'wireless-earbuds', name: 'Wireless Earbuds & Audio', popular: true },
@@ -23,7 +23,7 @@ export const INITIAL_CATEGORIES = [
     name: 'Home & Kitchen Gadgets',
     icon: 'Home',
     image: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=500&auto=format&fit=crop&q=60',
-    itemCount: 2340,
+    itemCount: 0,
     featured: true,
     subcategories: [
       { id: 'sub-appliances', slug: 'smart-appliances', name: 'Air Fryers & Blenders', popular: true },
@@ -39,7 +39,7 @@ export const INITIAL_CATEGORIES = [
     name: "Men's Fashion & Accessories",
     icon: 'Watch',
     image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop&q=60',
-    itemCount: 1890,
+    itemCount: 0,
     featured: true,
     subcategories: [
       { id: 'sub-watches', slug: 'mens-luxury-watches', name: 'Chronograph & Quartz Watches', popular: true },
@@ -55,7 +55,7 @@ export const INITIAL_CATEGORIES = [
     name: "Women's Fashion & Jewelry",
     icon: 'Sparkles',
     image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=500&auto=format&fit=crop&q=60',
-    itemCount: 3100,
+    itemCount: 0,
     featured: true,
     subcategories: [
       { id: 'sub-handbags', slug: 'designer-handbags', name: 'Crossbody Bags & Clutches', popular: true },
@@ -71,7 +71,7 @@ export const INITIAL_CATEGORIES = [
     name: 'Beauty, Health & Care',
     icon: 'HeartPulse',
     image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500&auto=format&fit=crop&q=60',
-    itemCount: 1650,
+    itemCount: 0,
     featured: true,
     subcategories: [
       { id: 'sub-trimmers', slug: 'shavers-trimmers', name: 'Pro Hair & Beard Trimmers', popular: true },
@@ -86,7 +86,7 @@ export const INITIAL_CATEGORIES = [
     name: 'Automotive & Bike Gear',
     icon: 'Car',
     image: 'https://images.unsplash.com/photo-1563720223185-11003d516935?w=500&auto=format&fit=crop&q=60',
-    itemCount: 940,
+    itemCount: 0,
     featured: false,
     subcategories: [
       { id: 'sub-dashcams', slug: 'car-dashcams', name: 'HD Dual Dash Cams & Reverse Cameras', popular: true },
@@ -101,7 +101,7 @@ export const INITIAL_CATEGORIES = [
     name: 'Kids, Toys & Baby',
     icon: 'Baby',
     image: 'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=500&auto=format&fit=crop&q=60',
-    itemCount: 1210,
+    itemCount: 0,
     featured: false,
     subcategories: [
       { id: 'sub-rc-toys', slug: 'rc-cars-drones', name: 'Stunt RC Cars & mini Drones', popular: true },
@@ -141,47 +141,4 @@ export const INITIAL_COUPONS = [
   }
 ];
 
-export const INITIAL_ORDERS = [
-  {
-    id: 'FTH-2026-001284',
-    orderNumber: 'FTH-2026-001284',
-    createdAt: new Date().toISOString(),
-    customer: {
-      name: 'Saad Ur Rehman',
-      phone: '03214892104',
-      email: 'saad.rehman@gmail.com'
-    },
-    shippingAddress: {
-      province: 'Punjab',
-      city: 'Lahore',
-      area: 'DHA Phase 5, Sector C',
-      street: 'House 412, Street 8',
-      landmark: 'Near Jalal Sons',
-      phone: '03214892104'
-    },
-    items: [
-      {
-        productId: 'mkz-prod-1',
-        title: 'Joyroom TWS Wireless Earbuds with LED Battery Display',
-        variantTitle: 'Standard Edition / Black',
-        price: 1900,
-        costPrice: 1050,
-        quantity: 1,
-        image: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400&auto=format&fit=crop&q=80',
-        sku: 'MKZ-ELE-0001'
-      }
-    ],
-    subtotal: 1900,
-    shippingFee: 0,
-    discount: 0,
-    total: 1900,
-    totalCost: 1050,
-    grossProfit: 850,
-    paymentMethod: 'cod',
-    paymentStatus: 'pending_cod',
-    status: 'in_transit',
-    courier: 'TCS Express',
-    trackingNumber: 'TCS-PK-982147321',
-    rtoRisk: 'low'
-  }
-];
+export const INITIAL_ORDERS = [];

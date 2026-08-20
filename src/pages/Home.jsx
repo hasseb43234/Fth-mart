@@ -375,235 +375,90 @@ export const Home = () => {
         </div>
       </section>
 
-      {/* 3. Section Band: Flash Deals with Countdown Clock & Carousel Controls */}
-      <section className="max-w-[1200px] mx-auto px-4 space-y-5">
+      {/* Categories Showcase Grid */}
+      <section className="max-w-[1200px] mx-auto px-4 space-y-6">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link
-              to="/c/electronics"
-              className="flex items-center gap-1.5 text-xl font-semibold text-black hover:text-[#5433eb] transition-colors tracking-tight-display group"
-            >
-              <span>Flash Deals</span>
-              <ChevronRight className="w-5 h-5 text-black group-hover:translate-x-1 transition-transform" />
-            </Link>
-
-            <span className="bg-red-50 text-red-600 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-tight-meta">
-              Up to 70% OFF
-            </span>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {/* Countdown Clock */}
-            <div className="flex items-center gap-2 text-xs text-[#787574] font-medium hidden sm:flex">
-              <Clock className="w-3.5 h-3.5 text-red-500" />
-              <span>Ends in:</span>
-              <div className="flex items-center gap-1 font-mono text-xs font-bold text-white">
-                <span className="bg-black px-2 py-0.5 rounded-full">{String(timeLeft.hours).padStart(2, '0')}</span>
-                <span className="text-black">:</span>
-                <span className="bg-black px-2 py-0.5 rounded-full">{String(timeLeft.minutes).padStart(2, '0')}</span>
-                <span className="text-black">:</span>
-                <span className="bg-[#5433eb] px-2 py-0.5 rounded-full shadow-violet-glow">{String(timeLeft.seconds).padStart(2, '0')}</span>
-              </div>
-            </div>
-
-            {/* Circular Carousel Controls */}
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={() => scrollRail(flashDealsRailRef, 'left')}
-                className="w-8 h-8 rounded-full bg-white hover:bg-[#f2f4f5] text-black shadow-pill flex items-center justify-center transition-all active:scale-95 border border-[#ebebeb]"
-                title="Scroll Left"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => scrollRail(flashDealsRailRef, 'right')}
-                className="w-8 h-8 rounded-full bg-white hover:bg-[#f2f4f5] text-black shadow-pill flex items-center justify-center transition-all active:scale-95 border border-[#ebebeb]"
-                title="Scroll Right"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Scrollable Product Rail */}
-        <div
-          ref={flashDealsRailRef}
-          className="flex items-stretch gap-4 overflow-x-auto no-scrollbar pb-2 pt-1"
-        >
-          {flashDeals.map((product) => (
-            <div key={product.id} className="w-[260px] sm:w-[280px] flex-shrink-0">
-              <ProductCard product={product} />
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 4. Section Band: Smart Electronics & Gadgets */}
-      <section className="max-w-[1200px] mx-auto px-4 space-y-5">
-        <div className="flex items-center justify-between">
-          <Link
-            to="/c/electronics"
-            className="flex items-center gap-1.5 text-xl font-semibold text-black hover:text-[#5433eb] transition-colors tracking-tight-display group"
-          >
-            <span>Smart Electronics &amp; Audio</span>
-            <ChevronRight className="w-5 h-5 text-black group-hover:translate-x-1 transition-transform" />
-          </Link>
-
           <div className="flex items-center gap-2">
-            <Link
-              to="/c/electronics"
-              className="text-xs font-semibold text-[#787574] hover:text-black transition-colors hidden sm:inline"
-            >
-              See all ({electronicsProducts.length}) →
-            </Link>
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={() => scrollRail(electronicsRailRef, 'left')}
-                className="w-8 h-8 rounded-full bg-white hover:bg-[#f2f4f5] text-black shadow-pill flex items-center justify-center transition-all active:scale-95 border border-[#ebebeb]"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => scrollRail(electronicsRailRef, 'right')}
-                className="w-8 h-8 rounded-full bg-white hover:bg-[#f2f4f5] text-black shadow-pill flex items-center justify-center transition-all active:scale-95 border border-[#ebebeb]"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
+            <Sparkles className="w-5 h-5 text-[#5433eb]" />
+            <h2 className="text-2xl font-bold text-black tracking-tight-display">
+              Shop by Category
+            </h2>
           </div>
-        </div>
-
-        <div
-          ref={electronicsRailRef}
-          className="flex items-stretch gap-4 overflow-x-auto no-scrollbar pb-2 pt-1"
-        >
-          {electronicsProducts.map((product) => (
-            <div key={product.id} className="w-[260px] sm:w-[280px] flex-shrink-0">
-              <ProductCard product={product} />
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 5. Section Band: Home & Kitchen Innovations */}
-      <section className="max-w-[1200px] mx-auto px-4 space-y-5">
-        <div className="flex items-center justify-between">
           <Link
-            to="/c/home-kitchen"
-            className="flex items-center gap-1.5 text-xl font-semibold text-black hover:text-[#5433eb] transition-colors tracking-tight-display group"
+            to="/categories"
+            className="text-xs font-bold text-[#5433eb] hover:underline flex items-center gap-1"
           >
-            <span>Home &amp; Kitchen Innovations</span>
-            <ChevronRight className="w-5 h-5 text-black group-hover:translate-x-1 transition-transform" />
+            View All Categories ({categories.length}) <ChevronRight className="w-4 h-4" />
           </Link>
-
-          <div className="flex items-center gap-2">
-            <Link
-              to="/c/home-kitchen"
-              className="text-xs font-semibold text-[#787574] hover:text-black transition-colors hidden sm:inline"
-            >
-              See all ({homeProducts.length}) →
-            </Link>
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={() => scrollRail(homeRailRef, 'left')}
-                className="w-8 h-8 rounded-full bg-white hover:bg-[#f2f4f5] text-black shadow-pill flex items-center justify-center transition-all active:scale-95 border border-[#ebebeb]"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => scrollRail(homeRailRef, 'right')}
-                className="w-8 h-8 rounded-full bg-white hover:bg-[#f2f4f5] text-black shadow-pill flex items-center justify-center transition-all active:scale-95 border border-[#ebebeb]"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
         </div>
 
-        <div
-          ref={homeRailRef}
-          className="flex items-stretch gap-4 overflow-x-auto no-scrollbar pb-2 pt-1"
-        >
-          {homeProducts.map((product) => (
-            <div key={product.id} className="w-[260px] sm:w-[280px] flex-shrink-0">
-              <ProductCard product={product} />
-            </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          {categories.map((cat) => (
+            <Link
+              key={cat.id}
+              to={`/c/${cat.slug}`}
+              className="group bg-white rounded-[24px] p-4 shadow-pillow hover:shadow-elevated transition-all border border-[#ebebeb] flex flex-col justify-between overflow-hidden hover:scale-[1.02]"
+            >
+              <div className="aspect-[4/3] rounded-[18px] overflow-hidden bg-[#f2f4f5] mb-3">
+                <img
+                  src={cat.image}
+                  alt={cat.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+              <div>
+                <h3 className="font-bold text-sm text-black group-hover:text-[#5433eb] transition-colors">
+                  {cat.name}
+                </h3>
+                <p className="text-[11px] text-[#787574] mt-0.5">
+                  {cat.subcategories?.length || 0} Subcategories
+                </p>
+              </div>
+            </Link>
           ))}
         </div>
       </section>
 
-      {/* 6. Section Band: Fashion & Lifestyle */}
-      {fashionProducts.length > 0 && (
-        <section className="max-w-[1200px] mx-auto px-4 space-y-5">
-          <div className="flex items-center justify-between">
-            <Link
-              to="/c/fashion-apparel"
-              className="flex items-center gap-1.5 text-xl font-semibold text-black hover:text-[#5433eb] transition-colors tracking-tight-display group"
-            >
-              <span>Fashion &amp; Apparel</span>
-              <ChevronRight className="w-5 h-5 text-black group-hover:translate-x-1 transition-transform" />
-            </Link>
+      {/* Product Sections (If products exist) */}
+      {products.length > 0 ? (
+        <>
+          {/* Flash Deals */}
+          {flashDeals.length > 0 && (
+            <section className="max-w-[1200px] mx-auto px-4 space-y-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-xl font-semibold text-black tracking-tight-display">Flash Deals</span>
+                  <span className="bg-red-50 text-red-600 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase">Up to 70% OFF</span>
+                </div>
+              </div>
+              <div className="flex items-stretch gap-4 overflow-x-auto no-scrollbar pb-2">
+                {flashDeals.map((p) => (
+                  <div key={p.id} className="w-[260px] sm:w-[280px] flex-shrink-0">
+                    <ProductCard product={p} />
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
-            <div className="flex items-center gap-2">
-              <Link
-                to="/c/fashion-apparel"
-                className="text-xs font-semibold text-[#787574] hover:text-black transition-colors hidden sm:inline"
-              >
-                See all ({fashionProducts.length}) →
-              </Link>
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => scrollRail(fashionRailRef, 'left')}
-                  className="w-8 h-8 rounded-full bg-white hover:bg-[#f2f4f5] text-black shadow-pill flex items-center justify-center transition-all active:scale-95 border border-[#ebebeb]"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => scrollRail(fashionRailRef, 'right')}
-                  className="w-8 h-8 rounded-full bg-white hover:bg-[#f2f4f5] text-black shadow-pill flex items-center justify-center transition-all active:scale-95 border border-[#ebebeb]"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
+          {/* Full Discovery Feed */}
+          <section className="max-w-[1200px] mx-auto px-4">
+            <div className="bg-white rounded-[28px] p-6 sm:p-8 shadow-pillow border border-[#ebebeb]/60 space-y-6">
+              <div className="flex items-center justify-between border-b border-[#ebebeb] pb-4">
+                <h2 className="text-xl font-semibold text-black tracking-tight-display">
+                  Explore Products
+                </h2>
+                <span className="text-xs text-[#787574]">{products.length} items</span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                {products.map((p) => (
+                  <ProductCard key={p.id} product={p} />
+                ))}
               </div>
             </div>
-          </div>
-
-          <div
-            ref={fashionRailRef}
-            className="flex items-stretch gap-4 overflow-x-auto no-scrollbar pb-2 pt-1"
-          >
-            {fashionProducts.map((product) => (
-              <div key={product.id} className="w-[260px] sm:w-[280px] flex-shrink-0">
-                <ProductCard product={product} />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* 7. Bottom Full Discovery Feed */}
-      <section className="max-w-[1200px] mx-auto px-4">
-        <div className="bg-white rounded-[28px] p-6 sm:p-8 shadow-pillow border border-[#ebebeb]/60 space-y-6">
-          <div className="flex items-center justify-between border-b border-[#ebebeb] pb-4">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-[#5433eb]" />
-              <h2 className="text-xl font-semibold text-black tracking-tight-display">
-                Explore Full Pakistani Catalogue
-              </h2>
-            </div>
-            <span className="text-xs text-[#787574]">
-              {products.length} dropshipping items
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        </div>
-      </section>
+          </section>
+        </>
+      ) : null}
     </div>
   );
 };

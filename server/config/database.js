@@ -73,16 +73,7 @@ class Database {
       try {
         const fileContent = fs.readFileSync(DB_FILE, 'utf-8');
         const parsed = JSON.parse(fileContent);
-        if (parsed.products && parsed.products.length >= 100) {
-          this.data = { ...this.data, ...parsed };
-        } else {
-          // If previous db had fewer products, refresh with the 500 catalog
-          this.data.categories = parsed.categories || this.data.categories;
-          this.data.users = parsed.users || this.data.users;
-          this.data.orders = parsed.orders || this.data.orders;
-          this.data.coupons = parsed.coupons || this.data.coupons;
-          this.save();
-        }
+        this.data = { ...this.data, ...parsed };
       } catch (err) {
         console.error('Error reading db.json, re-initializing seed:', err);
         this.save();
