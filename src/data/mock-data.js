@@ -9,7 +9,7 @@ export const INITIAL_CATEGORIES = [
     urduName: 'الیکٹرانکس اور اسمارٹ ڈیوائسز',
     icon: 'Cpu',
     image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop&q=60',
-    itemCount: 0,
+    itemCount: 100,
     featured: true,
     subcategories: [
       { id: 'sub-earbuds', slug: 'wireless-earbuds', name: 'Wireless Earbuds & Audio', popular: true },
@@ -26,7 +26,7 @@ export const INITIAL_CATEGORIES = [
     urduName: 'گھریلو اور کچن کی اشیاء',
     icon: 'Home',
     image: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=500&auto=format&fit=crop&q=60',
-    itemCount: 0,
+    itemCount: 100,
     featured: true,
     subcategories: [
       { id: 'sub-appliances', slug: 'smart-appliances', name: 'Air Fryers & Blenders', popular: true },
@@ -43,7 +43,7 @@ export const INITIAL_CATEGORIES = [
     urduName: 'مردانہ فیشن اور گھڑیاں',
     icon: 'Watch',
     image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop&q=60',
-    itemCount: 0,
+    itemCount: 100,
     featured: true,
     subcategories: [
       { id: 'sub-watches', slug: 'mens-luxury-watches', name: 'Chronograph & Quartz Watches', popular: true },
@@ -60,7 +60,7 @@ export const INITIAL_CATEGORIES = [
     urduName: 'خواتین کا فیشن اور جیولری',
     icon: 'Sparkles',
     image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=500&auto=format&fit=crop&q=60',
-    itemCount: 0,
+    itemCount: 100,
     featured: true,
     subcategories: [
       { id: 'sub-handbags', slug: 'designer-handbags', name: 'Crossbody Bags & Clutches', popular: true },
@@ -77,7 +77,7 @@ export const INITIAL_CATEGORIES = [
     urduName: 'خوبصورتی اور صحت کی دیکھ بھال',
     icon: 'HeartPulse',
     image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500&auto=format&fit=crop&q=60',
-    itemCount: 0,
+    itemCount: 100,
     featured: true,
     subcategories: [
       { id: 'sub-trimmers', slug: 'shavers-trimmers', name: 'Pro Hair & Beard Trimmers', popular: true },
@@ -93,7 +93,7 @@ export const INITIAL_CATEGORIES = [
     urduName: 'گاڑی اور بائیک کا سامان',
     icon: 'Car',
     image: 'https://images.unsplash.com/photo-1563720223185-11003d516935?w=500&auto=format&fit=crop&q=60',
-    itemCount: 0,
+    itemCount: 100,
     featured: false,
     subcategories: [
       { id: 'sub-dashcams', slug: 'car-dashcams', name: 'HD Dual Dash Cams & Reverse Cameras', popular: true },
@@ -109,7 +109,7 @@ export const INITIAL_CATEGORIES = [
     urduName: 'بچوں کے کھلونے اور سامان',
     icon: 'Baby',
     image: 'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=500&auto=format&fit=crop&q=60',
-    itemCount: 0,
+    itemCount: 100,
     featured: false,
     subcategories: [
       { id: 'sub-rc-toys', slug: 'rc-cars-drones', name: 'Stunt RC Cars & mini Drones', popular: true },
@@ -124,7 +124,7 @@ export const INITIAL_CATEGORIES = [
     urduName: 'کھیل اور فٹنس کا سامان',
     icon: 'Dumbbell',
     image: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=500&auto=format&fit=crop&q=60',
-    itemCount: 0,
+    itemCount: 100,
     featured: false,
     subcategories: [
       { id: 'sub-gym', slug: 'resistance-bands-weights', name: 'Home Workout Bands & Grip Sets', popular: true },
