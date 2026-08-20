@@ -1,0 +1,187 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-gt-standard: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-urdu: 'Noto Nastaliq Urdu', serif;
+
+  /* Refero Style Reference Tokens (Shopify Shop System) */
+  --color-canvas-mist: #f2f4f5;
+  --color-pure-white: #ffffff;
+  --color-ink-black: #000000;
+  --color-faint-border: #ebebeb;
+  --color-muted-gray: #787574;
+  --color-cool-stone: #cccccc;
+  --color-warm-fog: #acb0aa;
+  --color-slate-ink: #332f2d;
+  --color-ash-veil: #665a54;
+
+  /* Signature Accents */
+  --color-shop-violet: #5433eb;
+  --color-violet-wash: #c0b5f3;
+  --color-brand-navy: #0f4c81;
+  --color-brand-emerald: #16a34a;
+  --color-deal-red: #ef4444;
+  --color-deal-orange: #f97316;
+}
+
+:root {
+  --shadow-sm-pill: rgba(0, 0, 0, 0.06) 0px 2px 8px 0px;
+  --shadow-pillow: rgba(0, 0, 0, 0.08) 0px 4px 6px -1px, rgba(0, 0, 0, 0.05) 0px 2px 4px -2px;
+  --shadow-elevated: rgba(0, 0, 0, 0.12) 0px 8px 28px 0px;
+  --shadow-violet-glow: rgba(84, 51, 235, 0.34) 0px 4px 24px 0px;
+  --shadow-violet-glow-intense: rgba(84, 51, 235, 0.55) 0px 6px 32px 0px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #f2f4f5;
+  color: #000000;
+  letter-spacing: -0.015em;
+  overflow-x: hidden;
+}
+
+/* Custom Soft Pillow Shadows */
+.shadow-pillow {
+  box-shadow: var(--shadow-pillow);
+}
+
+.shadow-pill {
+  box-shadow: var(--shadow-sm-pill);
+}
+
+.shadow-elevated {
+  box-shadow: var(--shadow-elevated);
+}
+
+.shadow-violet-glow {
+  box-shadow: var(--shadow-violet-glow);
+}
+
+.shadow-violet-glow:hover {
+  box-shadow: var(--shadow-violet-glow-intense);
+}
+
+/* Floating Constellation Keyframe Animations */
+@keyframes float1 {
+  0%, 100% {
+    transform: translateY(0px) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(1deg);
+  }
+}
+
+@keyframes float2 {
+  0%, 100% {
+    transform: translateY(0px) rotate(1.5deg);
+  }
+  50% {
+    transform: translateY(-14px) rotate(-0.5deg);
+  }
+}
+
+@keyframes float3 {
+  0%, 100% {
+    transform: translateY(0px) rotate(-0.8deg);
+  }
+  50% {
+    transform: translateY(10px) rotate(1.2deg);
+  }
+}
+
+@keyframes float4 {
+  0%, 100% {
+    transform: translateY(0px) rotate(1deg);
+  }
+  50% {
+    transform: translateY(-9px) rotate(-1.5deg);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 4px 24px rgba(84, 51, 235, 0.34);
+  }
+  50% {
+    box-shadow: 0 6px 36px rgba(84, 51, 235, 0.6);
+  }
+}
+
+.animate-float-1 {
+  animation: float1 6s ease-in-out infinite;
+}
+
+.animate-float-2 {
+  animation: float2 7s ease-in-out infinite 1s;
+}
+
+.animate-float-3 {
+  animation: float3 8s ease-in-out infinite 0.5s;
+}
+
+.animate-float-4 {
+  animation: float4 6.5s ease-in-out infinite 1.5s;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+/* Tight Negative Letter Spacing */
+.tracking-tight-display {
+  letter-spacing: -0.05em;
+}
+
+.tracking-tight-body {
+  letter-spacing: -0.031em;
+}
+
+.tracking-tight-meta {
+  letter-spacing: -0.017em;
+}
+
+/* Custom modern scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f2f4f5;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Print styles */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printable-receipt, #printable-receipt * {
+    visibility: visible;
+  }
+  #printable-receipt {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}

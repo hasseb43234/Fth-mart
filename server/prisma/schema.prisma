@@ -1,0 +1,233 @@
+// Prisma Schema for PostgreSQL
+// When you connect your PostgreSQL database, run:
+// npx prisma migrate dev --name init
+// npx prisma generate
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  DISPATCHED
+  IN_TRANSIT
+  DELIVERED
+  CANCELLED
+  RTO
+}
+
+enum PaymentMethod {
+  COD
+  JAZZCASH
+  EASYPAISA
+  BANK_TRANSFER
+  CARD
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+model User {
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  phone        String?   @unique
+  passwordHash String
+  role         Role      @default(CUSTOMER)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  addresses    Address[]
+  orders       Order[]
+  reviews      Review[]
+
+  @@map("users")
+}
+
+model Address {
+  id            String   @id @default(uuid())
+  userId        String
+  recipientName String
+  phone         String
+  province      String
+  city          String
+  area          String
+  street        String
+  landmark      String?
+  isDefault     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("addresses")
+}
+
+model Category {
+  id            String    @id @default(uuid())
+  slug          String    @unique
+  name          String
+  urduName      String?
+  icon          String?
+  image         String?
+  itemCount     Int       @default(0)
+  featured      Boolean   @default(false)
+  subcategories Json?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  products      Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id                String    @id @default(uuid())
+  sku               String    @unique
+  title             String
+  slug              String    @unique
+  brand             String
+  categorySlug      String
+  subcategorySlug   String?
+  price             Float
+  compareAtPrice    Float?
+  supplierCost      Float
+  stock             Int       @default(0)
+  lowStockThreshold Int       @default(15)
+  ordersCount       Int       @default(0)
+  rating            Float     @default(5.0)
+  reviewsCount      Int       @default(0)
+  freeShipping      Boolean   @default(false)
+  isFlashDeal       Boolean   @default(false)
+  isFeatured        Boolean   @default(false)
+  images            String[]
+  description       String?
+  specifications    Json?
+  supplierInfo      Json?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  category          Category  @relation(fields: [categorySlug], references: [slug])
+  variants          Variant[]
+  orderItems        OrderItem[]
+  reviews           Review[]
+
+  @@index([categorySlug])
+  @@index([brand])
+  @@map("products")
+}
+
+model Variant {
+  id             String    @id @default(uuid())
+  productId      String
+  sku            String    @unique
+  name           String
+  color          String?
+  size           String?
+  price          Float
+  compareAtPrice Float?
+  costPrice      Float?
+  stock          Int       @default(0)
+
+  product        Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderItems     OrderItem[]
+
+  @@map("variants")
+}
+
+model Order {
+  id             String        @id @default(uuid())
+  orderNumber    String        @unique
+  userId         String?
+  customerName   String
+  customerPhone  String
+  customerEmail  String?
+  shippingAddress Json
+  subtotal       Float
+  shippingFee    Float         @default(0)
+  discount       Float         @default(0)
+  total          Float
+  totalCost      Float
+  grossProfit    Float
+  paymentMethod  PaymentMethod @default(COD)
+  paymentStatus  PaymentStatus @default(PENDING)
+  status         OrderStatus   @default(PENDING)
+  courier        String?       // "TCS Express", "Trax", "Leopards"
+  trackingNumber String?
+  rtoRisk        String?       @default("low")
+  notes          String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  user           User?         @relation(fields: [userId], references: [id])
+  items          OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id           String   @id @default(uuid())
+  orderId      String
+  productId    String
+  variantId    String?
+  title        String
+  variantTitle String?
+  price        Float
+  costPrice    Float
+  quantity     Int
+  image        String?
+  sku          String?
+
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product      Product  @relation(fields: [productId], references: [id])
+  variant      Variant? @relation(fields: [variantId], references: [id])
+
+  @@map("order_items")
+}
+
+model Coupon {
+  id              String   @id @default(uuid())
+  code            String   @unique
+  discountPercent Float    @default(0)
+  fixedDiscount   Float    @default(0)
+  minSpend        Float    @default(0)
+  description     String?
+  expiry          DateTime?
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
+  @@map("coupons")
+}
+
+model Review {
+  id               String   @id @default(uuid())
+  productId        String
+  userId           String?
+  userName         String
+  userAvatar       String?
+  rating           Int
+  comment          String
+  images           String[]
+  verifiedPurchase Boolean  @default(true)
+  helpfulCount     Int      @default(0)
+  createdAt        DateTime @default(now())
+
+  product          Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user             User?    @relation(fields: [userId], references: [id])
+
+  @@map("reviews")
+}
