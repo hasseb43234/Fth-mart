@@ -43,12 +43,31 @@ export const ProductDetail = () => {
 
   // Robust product lookup by slug or ID across store & catalog
   const product = useMemo(() => {
-    return (
-      products.find((p) => p.slug === productSlug || p.id === productSlug) ||
-      MARKAZ_PRODUCTS_500.find((p) => p.slug === productSlug || p.id === productSlug) ||
-      products[0] ||
-      MARKAZ_PRODUCTS_500[0]
-    );
+    if (!productSlug) return products[0] || MARKAZ_PRODUCTS_500[0];
+    const target = decodeURIComponent(productSlug).toLowerCase().trim();
+    const allProducts = (products && products.length > 0) ? products : MARKAZ_PRODUCTS_500;
+    
+    // 1. Exact slug or ID match
+    let found = allProducts.find((p) => p.slug.toLowerCase() === target || p.id.toLowerCase() === target);
+    if (found) return found;
+
+    // 2. Lookup in static 500 catalog
+    found = MARKAZ_PRODUCTS_500.find((p) => p.slug.toLowerCase() === target || p.id.toLowerCase() === target);
+    if (found) return found;
+
+    // 3. Match numeric ID extracted from slug (e.g. -71 -> mkz-prod-71)
+    const idMatch = target.match(/-(\d+)$/);
+    if (idMatch) {
+      const numericId = `mkz-prod-${idMatch[1]}`;
+      found = allProducts.find((p) => p.id === numericId) || MARKAZ_PRODUCTS_500.find((p) => p.id === numericId);
+      if (found) return found;
+    }
+
+    // 4. Partial slug contains
+    found = allProducts.find((p) => p.slug.toLowerCase().includes(target) || target.includes(p.slug.toLowerCase()));
+    if (found) return found;
+
+    return allProducts[0] || MARKAZ_PRODUCTS_500[0];
   }, [products, productSlug]);
 
   const [selectedImageIdx, setSelectedImageIdx] = useState(0);
