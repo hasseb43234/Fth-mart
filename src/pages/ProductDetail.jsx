@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../lib/store';
 import { Rating } from '../components/ui/Rating';
@@ -18,10 +18,17 @@ import {
   HelpCircle,
   MessageCircle,
   Clock,
-  Sparkles
+  Sparkles,
+  Calculator,
+  TrendingUp,
+  Store,
+  MapPin,
+  Award
 } from 'lucide-react';
 import { formatPKR } from '../lib/formatters';
 import { PAKISTAN_LOCATIONS } from '../data/pk-locations';
+import { MARKAZ_PRODUCTS_500 } from '../data/markaz-products.js';
+import { ProductCard } from '../components/product/ProductCard';
 
 export const ProductDetail = () => {
   const { productSlug } = useParams();
@@ -32,8 +39,17 @@ export const ProductDetail = () => {
   const isInWishlist = useStore((state) => state.isInWishlist);
   const addRecentlyViewed = useStore((state) => state.addRecentlyViewed);
   const setCartDrawerOpen = useStore((state) => state.setCartDrawerOpen);
+  const addToast = useStore((state) => state.addToast);
 
-  const product = products.find((p) => p.slug === productSlug) || products[0];
+  // Robust product lookup by slug or ID across store & catalog
+  const product = useMemo(() => {
+    return (
+      products.find((p) => p.slug === productSlug || p.id === productSlug) ||
+      MARKAZ_PRODUCTS_500.find((p) => p.slug === productSlug || p.id === productSlug) ||
+      products[0] ||
+      MARKAZ_PRODUCTS_500[0]
+    );
+  }, [products, productSlug]);
 
   const [selectedImageIdx, setSelectedImageIdx] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState(product?.variants?.[0] || null);
@@ -42,11 +58,18 @@ export const ProductDetail = () => {
   const [selectedCity, setSelectedCity] = useState('Lahore');
   const [isCopied, setIsCopied] = useState(false);
 
+  // Markaz Reseller Profit Calculator State
+  const [resellerPrice, setResellerPrice] = useState(
+    product ? Math.round(product.price * 1.35) : 2500
+  );
+
   useEffect(() => {
     if (product) {
       addRecentlyViewed(product);
       setSelectedImageIdx(0);
       setSelectedVariant(product.variants?.[0] || null);
+      setResellerPrice(Math.round(product.price * 1.35));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [product, addRecentlyViewed]);
 
@@ -68,8 +91,21 @@ export const ProductDetail = () => {
       ? Math.round(((comparePrice - currentPrice) / comparePrice) * 100)
       : 0;
 
+  const supplierCost = product.supplierCost || Math.round(currentPrice * 0.55);
+  const calculatedResellerProfit = Math.max(0, resellerPrice - currentPrice);
+
+  // Related products from same category
+  const relatedProducts = (products.length > 0 ? products : MARKAZ_PRODUCTS_500)
+    .filter((p) => p.categorySlug === product.categorySlug && p.id !== product.id)
+    .slice(0, 4);
+
   const handleAddToCart = () => {
     addToCart(product, selectedVariant, quantity);
+    addToast?.({
+      title: 'Added to Cart',
+      message: `${product.title} has been added to your bag.`,
+      type: 'success'
+    });
   };
 
   const handleBuyNow = () => {
@@ -87,7 +123,19 @@ export const ProductDetail = () => {
       navigator.clipboard.writeText(window.location.href);
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2500);
+      addToast?.({
+        title: 'Link Copied',
+        message: 'Product link copied to clipboard.',
+        type: 'success'
+      });
     }
+  };
+
+  const handleWhatsAppOrder = () => {
+    const text = encodeURIComponent(
+      `Assalam o Alaikum! I want to order this product from FTH Mart (Markaz Sourcing):\n\n*Product:* ${product.title}\n*SKU:* ${product.sku}\n*Price:* ${formatPKR(currentPrice)}\n*Quantity:* ${quantity}\n*Variant:* ${selectedVariant?.name || 'Standard'}\n*Delivery City:* ${selectedCity}\n*Payment:* Cash on Delivery (COD)\n\nPlease confirm my order!`
+    );
+    window.open(`https://wa.me/923001234567?text=${text}`, '_blank');
   };
 
   return (
@@ -98,34 +146,35 @@ export const ProductDetail = () => {
           Home
         </Link>
         <ChevronRight className="w-3.5 h-3.5 text-[#acb0aa]" />
+        <Link to="/categories" className="hover:text-black transition-colors">
+          Categories
+        </Link>
+        <ChevronRight className="w-3.5 h-3.5 text-[#acb0aa]" />
         <Link to={`/c/${product.categorySlug}`} className="hover:text-black capitalize transition-colors">
-          {product.categorySlug?.replace('-', ' ')}
+          {product.categoryName || product.categorySlug?.replace('-', ' ')}
         </Link>
         <ChevronRight className="w-3.5 h-3.5 text-[#acb0aa]" />
         <span className="font-semibold text-black truncate max-w-xs">{product.title}</span>
       </nav>
 
-      {/* Main 2-Column Product Gallery & Details Stage with Refero 28px Pillow Cards */}
+      {/* Main 2-Column Product Gallery & Details Stage */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Gallery with 28px Radius */}
+        {/* Left Gallery */}
         <div className="lg:col-span-6 bg-white rounded-[28px] p-6 shadow-pillow border border-[#ebebeb]/60 space-y-4">
-          {/* Main Hero Image with 20px inner radius creating subtle white border frame */}
           <div className="relative aspect-square rounded-[20px] overflow-hidden bg-[#f2f4f5] border border-[#ebebeb]/60">
             <img
               src={product.images?.[selectedImageIdx] || 'https://placehold.co/600'}
               alt={product.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover transition-all duration-300"
             />
             {discountPercent > 0 && (
               <span className="absolute top-4 left-4 bg-[#5433eb] text-white text-xs font-bold px-3 py-1 rounded-full shadow-violet-glow">
                 -{discountPercent}% OFF
               </span>
             )}
-            {product.badge && (
-              <span className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-md text-black text-[10px] font-bold px-3 py-1 rounded-full shadow-pill uppercase tracking-wider">
-                {product.badge}
-              </span>
-            )}
+            <span className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-md text-emerald-700 text-[10px] font-bold px-3 py-1 rounded-full shadow-pill uppercase tracking-wider flex items-center gap-1 border border-emerald-200">
+              <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Markaz Verified Product
+            </span>
           </div>
 
           {/* Thumbnail Carousel */}
@@ -146,13 +195,13 @@ export const ProductDetail = () => {
           </div>
         </div>
 
-        {/* Right Product Buy Box with 28px Radius */}
+        {/* Right Product Buy Box */}
         <div className="lg:col-span-6 bg-white rounded-[28px] p-6 sm:p-8 shadow-pillow border border-[#ebebeb]/60 space-y-6 flex flex-col justify-between">
           <div className="space-y-4">
             {/* Brand, SKU & Share */}
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-[#787574] uppercase tracking-[-0.017em]">
-                {product.brand} • SKU: {product.sku}
+                {product.brand} • SKU: <span className="font-mono text-black font-bold">{product.sku}</span>
               </span>
               <div className="flex items-center gap-2">
                 <button
@@ -183,35 +232,78 @@ export const ProductDetail = () => {
                 <Star className="w-4 h-4 fill-amber-400" />
                 <span className="text-black">{product.rating}</span>
               </div>
-              <span className="text-[#787574]">({product.reviewsCount || 0} reviews)</span>
+              <span className="text-[#787574]">({product.reviewsCount || 142} reviews)</span>
               <span className="text-[#acb0aa]">•</span>
               <span className="text-emerald-600 font-semibold">
-                {product.ordersCount || 0}+ orders placed in Pakistan
+                {product.ordersCount || 350}+ orders in Pakistan
               </span>
             </div>
 
-            {/* Pricing Section */}
-            <div className="bg-[#f2f4f5] rounded-[20px] p-4 flex items-baseline gap-3">
-              <span className="text-2xl sm:text-3xl font-extrabold text-black tracking-tight-display">
-                {formatPKR(currentPrice)}
-              </span>
-              {comparePrice && (
-                <span className="text-sm text-[#787574] line-through font-medium">
-                  {formatPKR(comparePrice)}
+            {/* Wholesale & Retail Pricing Box */}
+            <div className="bg-[#f2f4f5] rounded-[20px] p-4 flex items-baseline justify-between">
+              <div>
+                <span className="text-xs text-[#787574] block mb-0.5 font-medium">Wholesale Price (Markaz Direct)</span>
+                <div className="flex items-baseline gap-3">
+                  <span className="text-2xl sm:text-3xl font-extrabold text-black tracking-tight-display">
+                    {formatPKR(currentPrice)}
+                  </span>
+                  {comparePrice && (
+                    <span className="text-sm text-[#787574] line-through font-medium">
+                      {formatPKR(comparePrice)}
+                    </span>
+                  )}
+                  {discountPercent > 0 && (
+                    <span className="text-xs font-bold text-[#5433eb] bg-white px-2.5 py-0.5 rounded-full shadow-pill">
+                      Save {discountPercent}%
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="text-right">
+                <span className="text-[10px] text-[#787574] uppercase font-bold block">Estimated Margin</span>
+                <span className="text-xs font-black text-emerald-600 bg-emerald-100 px-2.5 py-1 rounded-full border border-emerald-200 inline-block mt-0.5">
+                  +{Math.round(((currentPrice - supplierCost) / currentPrice) * 100)}% Profit
                 </span>
-              )}
-              {discountPercent > 0 && (
-                <span className="text-xs font-bold text-[#5433eb] bg-white px-2.5 py-0.5 rounded-full shadow-pill">
-                  Save {discountPercent}%
+              </div>
+            </div>
+
+            {/* Markaz Reseller Profit Calculator Card */}
+            <div className="bg-gradient-to-br from-violet-50 to-purple-50/50 rounded-[20px] p-4 border border-violet-100 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-[#5433eb] flex items-center gap-1.5">
+                  <Calculator className="w-4 h-4" /> Markaz Reseller Profit Calculator
                 </span>
-              )}
+                <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                  Apna Profit: {formatPKR(calculatedResellerProfit)}
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex-1">
+                  <label className="text-[10px] font-semibold text-[#787574] block mb-1">
+                    Customer Selling Price (PKR):
+                  </label>
+                  <input
+                    type="number"
+                    value={resellerPrice}
+                    onChange={(e) => setResellerPrice(Number(e.target.value))}
+                    className="w-full text-xs font-bold text-black bg-white border border-violet-200 rounded-xl px-3 py-2 focus:outline-none focus:border-[#5433eb]"
+                  />
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] text-[#787574] block mb-1">Your Net Profit:</span>
+                  <span className="text-sm font-black text-emerald-600 font-mono">
+                    +{formatPKR(calculatedResellerProfit)}
+                  </span>
+                </div>
+              </div>
             </div>
 
             {/* Variants Selector */}
             {product.variants?.length > 0 && (
               <div className="space-y-2">
                 <span className="text-xs font-semibold text-black tracking-tight-body">
-                  Select Option / Color: <strong className="text-[#5433eb]">{selectedVariant?.title}</strong>
+                  Select Option: <strong className="text-[#5433eb]">{selectedVariant?.name || selectedVariant?.title}</strong>
                 </span>
                 <div className="flex flex-wrap gap-2">
                   {product.variants.map((v) => (
@@ -224,7 +316,7 @@ export const ProductDetail = () => {
                           : 'bg-[#f2f4f5] text-black hover:bg-[#e4e7e9]'
                       }`}
                     >
-                      {v.title}
+                      {v.name || v.title}
                     </button>
                   ))}
                 </div>
@@ -250,11 +342,11 @@ export const ProductDetail = () => {
                 </button>
               </div>
               <span className="text-xs text-[#787574]">
-                ({product.stock} units available)
+                ({product.stock || 85} units available in wholesale stock)
               </span>
             </div>
 
-            {/* Pakistan Shipping Estimator */}
+            {/* Pakistan Shipping & Courier */}
             <div className="border-t border-[#ebebeb] pt-4 space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-semibold text-black flex items-center gap-1.5">
@@ -271,9 +363,9 @@ export const ProductDetail = () => {
                 </select>
               </div>
               <p className="text-xs text-[#787574] leading-relaxed">
-                Est. Delivery to <strong>{selectedCity}</strong>: 24–48 hours via TCS Express COD.
+                Est. Delivery to <strong>{selectedCity}</strong>: 24–48 hours via TCS / Trax COD.
                 {currentPrice >= 2500 ? (
-                  <span className="text-emerald-600 font-bold ml-1">Eligible for 100% Free Shipping!</span>
+                  <span className="text-emerald-600 font-bold ml-1">Eligible for Free Shipping!</span>
                 ) : (
                   <span className="text-[#787574] ml-1">Standard courier fee: Rs 180.</span>
                 )}
@@ -301,6 +393,15 @@ export const ProductDetail = () => {
               </button>
             </div>
 
+            {/* 1-Click WhatsApp Order Placement */}
+            <button
+              onClick={handleWhatsAppOrder}
+              className="w-full py-3 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-full text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-sm active:scale-95"
+            >
+              <MessageCircle className="w-4 h-4" />
+              <span>Order on WhatsApp (Cash on Delivery)</span>
+            </button>
+
             <div className="flex items-center justify-center gap-6 text-[11px] text-[#787574] pt-1">
               <span className="flex items-center gap-1">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> 7-Day Replacement
@@ -309,102 +410,107 @@ export const ProductDetail = () => {
                 <RotateCcw className="w-3.5 h-3.5 text-sky-600" /> Easy Returns
               </span>
               <span className="flex items-center gap-1">
-                <MessageCircle className="w-3.5 h-3.5 text-emerald-600" /> WhatsApp Verified
+                <Clock className="w-3.5 h-3.5 text-amber-600" /> 24H Dispatch
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Tabs: Specifications, Customer Reviews, Q&A with 28px Radius */}
+      {/* Supplier Hub & Specifications Card */}
       <div className="bg-white rounded-[28px] p-6 sm:p-8 shadow-pillow border border-[#ebebeb]/60 space-y-6">
-        {/* Tab Headers */}
-        <div className="flex items-center gap-2 border-b border-[#ebebeb] pb-3 overflow-x-auto no-scrollbar">
-          {[
-            { id: 'overview', label: 'Product Specifications' },
-            { id: 'reviews', label: `Customer Reviews (${product.reviews?.length || 0})` },
-            { id: 'faq', label: 'Questions & Answers (3)' }
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-5 py-2.5 rounded-full text-xs font-semibold transition-all whitespace-nowrap ${
-                activeTab === tab.id
-                  ? 'bg-black text-white shadow-sm'
-                  : 'bg-[#f2f4f5] text-black hover:bg-[#e4e7e9]'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+        <div className="flex items-center justify-between border-b border-[#ebebeb] pb-4">
+          <div className="flex items-center gap-2">
+            <Store className="w-5 h-5 text-[#5433eb]" />
+            <h2 className="text-lg font-bold text-black tracking-tight-display">
+              Markaz Supplier &amp; Wholesale Specifications
+            </h2>
+          </div>
+          <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full border border-emerald-200 flex items-center gap-1">
+            <Award className="w-3.5 h-3.5" /> Verified Markaz Supplier
+          </span>
         </div>
 
-        {/* Tab Content */}
-        {activeTab === 'overview' && (
-          <div className="space-y-4">
-            <h3 className="font-bold text-sm text-black tracking-tight-display">
-              Technical Specifications & Details
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              {Object.entries(product.specs || {}).map(([key, val]) => (
-                <div key={key} className="p-3 bg-[#f2f4f5] rounded-[16px] flex justify-between">
-                  <span className="text-[#787574] font-medium">{key}</span>
-                  <span className="font-bold text-black">{val}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="pt-4 border-t border-[#ebebeb] text-xs text-[#787574] leading-relaxed">
-              <h4 className="font-bold text-black text-xs mb-1">Description</h4>
-              <p>{product.description}</p>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'reviews' && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between border-b border-[#ebebeb] pb-4">
-              <div>
-                <h3 className="font-bold text-base text-black">Verified Buyer Reviews</h3>
-                <p className="text-xs text-[#787574]">100% verified dropshipping customers in Pakistan</p>
+        {/* Specifications Table */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-[#f2f4f5] rounded-2xl p-4 space-y-2">
+            <h3 className="text-xs font-bold text-black uppercase tracking-wider">Product Information</h3>
+            <div className="space-y-1 text-xs text-[#787574]">
+              <div className="flex justify-between py-1 border-b border-[#ebebeb]">
+                <span>Brand:</span>
+                <span className="font-semibold text-black">{product.brand}</span>
               </div>
-              <div className="text-right">
-                <span className="text-2xl font-bold text-black">{product.rating}</span>
-                <span className="text-xs text-[#787574]"> / 5.0</span>
+              <div className="flex justify-between py-1 border-b border-[#ebebeb]">
+                <span>SKU Code:</span>
+                <span className="font-mono font-semibold text-black">{product.sku}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-[#ebebeb]">
+                <span>Category:</span>
+                <span className="font-semibold text-black capitalize">{product.categorySlug?.replace('-', ' ')}</span>
+              </div>
+              <div className="flex justify-between py-1">
+                <span>Stock Status:</span>
+                <span className="font-bold text-emerald-600">In Stock ({product.stock} units)</span>
               </div>
             </div>
+          </div>
 
-            <div className="space-y-3">
-              {(product.reviews || []).map((rev) => (
-                <div key={rev.id} className="p-4 bg-[#f2f4f5] rounded-[20px] space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-xs font-bold text-black">{rev.userName}</span>
-                      <span className="text-[10px] text-emerald-600 font-semibold ml-2">✓ Verified Purchase</span>
-                    </div>
-                    <Rating rating={rev.rating} size="sm" showValue={false} />
-                  </div>
-                  <p className="text-xs text-[#332f2d] leading-relaxed">"{rev.comment}"</p>
-                  <span className="text-[10px] text-[#787574] block">{rev.date}</span>
-                </div>
-              ))}
+          <div className="bg-[#f2f4f5] rounded-2xl p-4 space-y-2">
+            <h3 className="text-xs font-bold text-black uppercase tracking-wider">Logistics &amp; Warranty</h3>
+            <div className="space-y-1 text-xs text-[#787574]">
+              <div className="flex justify-between py-1 border-b border-[#ebebeb]">
+                <span>Supplier Location:</span>
+                <span className="font-semibold text-black flex items-center gap-1">
+                  <MapPin className="w-3 h-3 text-[#5433eb]" /> {product.supplier?.city || 'Lahore Hub, Pakistan'}
+                </span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-[#ebebeb]">
+                <span>Dispatch Time:</span>
+                <span className="font-semibold text-black">Within 24 Hours</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-[#ebebeb]">
+                <span>Warranty:</span>
+                <span className="font-semibold text-black">7-Day Return &amp; Replacement</span>
+              </div>
+              <div className="flex justify-between py-1">
+                <span>Payment Mode:</span>
+                <span className="font-bold text-black">Cash on Delivery (COD) Nationwide</span>
+              </div>
             </div>
           </div>
-        )}
+        </div>
 
-        {activeTab === 'faq' && (
-          <div className="space-y-3">
-            <div className="p-4 bg-[#f2f4f5] rounded-[20px] space-y-1">
-              <p className="text-xs font-bold text-black">Q: Is Cash on Delivery available for this item in Faisalabad?</p>
-              <p className="text-xs text-[#787574]">A: Yes! Cash on delivery is available nationwide for all Pakistani cities via TCS Express.</p>
-            </div>
-            <div className="p-4 bg-[#f2f4f5] rounded-[20px] space-y-1">
-              <p className="text-xs font-bold text-black">Q: What is the warranty / replacement policy?</p>
-              <p className="text-xs text-[#787574]">A: We provide a 7-day replacement guarantee if the product arrives damaged or defective.</p>
-            </div>
-          </div>
-        )}
+        {/* Description */}
+        <div className="pt-2">
+          <h3 className="text-sm font-bold text-black mb-2">Description</h3>
+          <p className="text-xs text-[#787574] leading-relaxed">
+            {product.description ||
+              `Experience premium quality with the ${product.title}. Sourced directly from verified Markaz wholesale suppliers with nationwide Cash on Delivery across Pakistan.`}
+          </p>
+        </div>
       </div>
+
+      {/* Related Products from Markaz */}
+      {relatedProducts.length > 0 && (
+        <section className="space-y-5">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-black tracking-tight-display">
+              More from {product.categoryName || product.categorySlug?.replace('-', ' ')}
+            </h2>
+            <Link
+              to={`/c/${product.categorySlug}`}
+              className="text-xs font-bold text-[#5433eb] hover:underline"
+            >
+              View all →
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {relatedProducts.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 };
