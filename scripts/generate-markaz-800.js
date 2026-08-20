@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { getProductImageGallery } from './generate-unique-galleries.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -355,11 +356,7 @@ for (const cat of CATEGORY_SCHEMAS) {
         rating: 4.9,
         trustScore: '99% Positive'
       },
-      images: [
-        itemTemplate.img,
-        'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=600&auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop&q=80'
-      ],
+      images: getProductImageGallery(cat.categorySlug, catCount, globalId),
       variants: [
         {
           id: `v-${globalId}-1`,
