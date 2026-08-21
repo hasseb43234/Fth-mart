@@ -31,8 +31,13 @@ export const ProductCard = ({ product, layout = 'grid' }) => {
       <div className="bg-white rounded-[28px] p-4 shadow-pillow hover:shadow-elevated transition-all duration-300 flex flex-col sm:flex-row gap-5 group">
         <Link to={`/p/${product.slug}`} className="relative sm:w-52 aspect-square flex-shrink-0 overflow-hidden rounded-[20px] bg-[#f2f4f5]">
           <img
-            src={product.images?.[0] || 'https://placehold.co/400'}
+            src={product.images?.[0] || 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=400&auto=format&fit=crop&q=80'}
             alt={product.title}
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=400&auto=format&fit=crop&q=80';
+            }}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             loading="lazy"
           />
@@ -132,8 +137,13 @@ export const ProductCard = ({ product, layout = 'grid' }) => {
       <div>
         <Link to={`/p/${product.slug}`} className="relative block aspect-square overflow-hidden rounded-[20px] bg-[#f2f4f5]">
           <img
-            src={product.images?.[0] || 'https://placehold.co/400'}
+            src={product.images?.[0] || 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=400&auto=format&fit=crop&q=80'}
             alt={product.title}
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=400&auto=format&fit=crop&q=80';
+            }}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
           />

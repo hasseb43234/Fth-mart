@@ -205,6 +205,11 @@ export const ProductDetail = () => {
             <img
               src={productImages[selectedImageIdx] || productImages[0]}
               alt={product.title}
+              referrerPolicy="no-referrer"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=600&auto=format&fit=crop&q=80';
+              }}
               className="w-full h-full object-cover transition-all duration-300"
             />
             {discountPercent > 0 && (
@@ -230,7 +235,16 @@ export const ProductDetail = () => {
                       : 'border-transparent opacity-70 hover:opacity-100 bg-[#f2f4f5]'
                   }`}
                 >
-                  <img src={img} alt="Thumb" className="w-full h-full object-cover" />
+                  <img
+                    src={img}
+                    alt="Thumb"
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=120&auto=format&fit=crop&q=80';
+                    }}
+                    className="w-full h-full object-cover"
+                  />
                 </button>
               ))}
             </div>

@@ -446,7 +446,16 @@ export const Header = () => {
               to={`/c/${cat.slug}`}
               className="flex items-center gap-2 bg-white hover:bg-[#f2f4f5] text-black px-4 py-2 rounded-full text-xs font-semibold border border-[#ebebeb] shadow-pill hover:shadow-pillow transition-all whitespace-nowrap tracking-tight-meta flex-shrink-0"
             >
-              <img src={cat.image} alt={cat.name} className="w-4 h-4 rounded-full object-cover" />
+              <img
+                src={cat.image}
+                alt={cat.name}
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=60&auto=format&fit=crop&q=80';
+                }}
+                className="w-4 h-4 rounded-full object-cover"
+              />
               <span>{cat.name}</span>
             </Link>
           ))}
