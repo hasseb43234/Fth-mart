@@ -548,8 +548,8 @@ export const useStore = create(
       }
     }),
     {
-      name: 'fth_mart_storage_v10',
-      version: 10,
+      name: 'fth_mart_storage_v11',
+      version: 11,
       migrate: (persistedState) => {
         return {
           ...persistedState,
