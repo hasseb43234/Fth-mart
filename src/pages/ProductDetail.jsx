@@ -25,7 +25,7 @@ import {
   Award
 } from 'lucide-react';
 import { formatPKR } from '../lib/formatters';
-import { PAKISTAN_LOCATIONS } from '../data/pk-locations';
+import { PAKISTAN_LOCATIONS } from '../data/pk-locations.js';
 import { MARKAZ_PRODUCTS_500 } from '../data/markaz-products.js';
 import { ProductCard } from '../components/product/ProductCard';
 
@@ -49,12 +49,14 @@ export const ProductDetail = () => {
   const wishlist = useStore((state) => state.wishlist || []);
   const addToCart = useStore((state) => state.addToCart);
   const toggleWishlist = useStore((state) => state.toggleWishlist);
+  const isInWishlistFn = useStore((state) => state.isInWishlist);
   const addRecentlyViewed = useStore((state) => state.addRecentlyViewed);
   const addToast = useStore((state) => state.addToast);
 
   // Ultra-resilient product lookup
   const product = useMemo(() => {
-    if (!productSlug) return (products && products[0]) || MARKAZ_PRODUCTS_500[0];
+    const catalog = (Array.isArray(products) && products.length > 0) ? products : MARKAZ_PRODUCTS_500;
+    if (!productSlug) return catalog[0] || MARKAZ_PRODUCTS_500[0];
     
     let target = '';
     try {
@@ -63,17 +65,19 @@ export const ProductDetail = () => {
       target = String(productSlug).toLowerCase().trim();
     }
 
-    const catalog = (products && products.length > 0) ? products : MARKAZ_PRODUCTS_500;
-    
-    // 1. Exact slug or ID or SKU match
-    let found = catalog.find((p) => 
-      p.slug?.toLowerCase() === target || 
-      p.id?.toLowerCase() === target ||
-      p.sku?.toLowerCase() === target
-    );
+    // 1. Exact slug match
+    let found = catalog.find((p) => p.slug?.toLowerCase() === target);
     if (found) return found;
 
-    // 2. Static catalog lookup
+    // 2. Exact ID match (e.g. mkz-p-71)
+    found = catalog.find((p) => p.id?.toLowerCase() === target);
+    if (found) return found;
+
+    // 3. Exact SKU match (e.g. MKZ-WUN-0001)
+    found = catalog.find((p) => p.sku?.toLowerCase() === target);
+    if (found) return found;
+
+    // 4. Static MARKAZ_PRODUCTS_500 lookup
     found = MARKAZ_PRODUCTS_500.find((p) => 
       p.slug?.toLowerCase() === target || 
       p.id?.toLowerCase() === target ||
@@ -81,7 +85,7 @@ export const ProductDetail = () => {
     );
     if (found) return found;
 
-    // 3. Match numeric ID extracted from slug (e.g. -71 -> mkz-p-71 or mkz-prod-71)
+    // 5. Match numeric suffix from slug (e.g. ...-71 -> mkz-p-71)
     const idMatch = target.match(/-(\d+)$/);
     if (idMatch) {
       const num = idMatch[1];
@@ -91,11 +95,11 @@ export const ProductDetail = () => {
       if (found) return found;
     }
 
-    // 4. Partial slug match
+    // 6. Partial slug match
     found = catalog.find((p) => p.slug?.toLowerCase().includes(target) || target.includes(p.slug?.toLowerCase()));
     if (found) return found;
 
-    // 5. Title keyword search
+    // 7. Title keyword search
     const cleanTarget = target.replace(/-/g, ' ');
     found = catalog.find((p) => p.title?.toLowerCase().includes(cleanTarget) || cleanTarget.includes(p.title?.toLowerCase()));
     if (found) return found;
@@ -112,7 +116,7 @@ export const ProductDetail = () => {
   // Safe images array
   const productImages = useMemo(() => {
     if (!product) return ['https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=600'];
-    if (Array.isArray(product.images) && product.images.length > 0) return product.images;
+    if (Array.isArray(product.images) && product.images.length > 0) return product.images.filter(Boolean);
     if (typeof product.image === 'string') return [product.image];
     return ['https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=600'];
   }, [product]);
@@ -123,12 +127,20 @@ export const ProductDetail = () => {
   useEffect(() => {
     if (product) {
       if (typeof addRecentlyViewed === 'function') {
-        addRecentlyViewed(product);
+        try {
+          addRecentlyViewed(product);
+        } catch {
+          // ignore
+        }
       }
       setSelectedImageIdx(0);
-      setSelectedVariant(product.variants?.[0] || null);
+      setSelectedVariant(Array.isArray(product.variants) ? product.variants[0] : null);
       setResellerPrice(Math.round((product.price || 1500) * 1.35));
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      try {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      } catch {
+        window.scrollTo(0, 0);
+      }
     }
   }, [product, addRecentlyViewed]);
 
@@ -143,7 +155,10 @@ export const ProductDetail = () => {
     );
   }
 
-  const isSavedInWishlist = wishlist.includes(product.id);
+  const isSavedInWishlist = typeof isInWishlistFn === 'function' 
+    ? isInWishlistFn(product.id) 
+    : (Array.isArray(wishlist) && wishlist.includes(product.id));
+
   const currentPrice = selectedVariant?.price || product.price || 1499;
   const comparePrice = selectedVariant?.compareAtPrice || product.compareAtPrice;
   const discountPercent =
@@ -155,7 +170,7 @@ export const ProductDetail = () => {
   const calculatedResellerProfit = Math.max(0, resellerPrice - currentPrice);
 
   // Related products from same category
-  const allProductsList = (products && products.length > 0) ? products : MARKAZ_PRODUCTS_500;
+  const allProductsList = (Array.isArray(products) && products.length > 0) ? products : MARKAZ_PRODUCTS_500;
   const relatedProducts = allProductsList
     .filter((p) => p.categorySlug === product.categorySlug && p.id !== product.id)
     .slice(0, 4);
@@ -178,9 +193,11 @@ export const ProductDetail = () => {
       navigator.share({
         title: product.title,
         url: window.location.href
-      });
+      }).catch(() => {});
     } else {
-      navigator.clipboard.writeText(window.location.href);
+      try {
+        navigator.clipboard.writeText(window.location.href);
+      } catch {}
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2500);
       if (typeof addToast === 'function') {
@@ -203,7 +220,7 @@ export const ProductDetail = () => {
   return (
     <div className="max-w-[1200px] mx-auto px-4 py-8 space-y-8 bg-[#f2f4f5] pb-24">
       {/* Breadcrumbs */}
-      <nav className="flex items-center gap-2 text-xs text-[#787574] tracking-tight-meta">
+      <nav className="flex items-center gap-2 text-xs text-[#787574] tracking-tight-meta flex-wrap">
         <Link to="/" className="hover:text-black transition-colors">
           Home
         </Link>
@@ -225,7 +242,7 @@ export const ProductDetail = () => {
         <div className="lg:col-span-6 bg-white rounded-[28px] p-6 shadow-pillow border border-[#ebebeb]/60 space-y-4">
           <div className="relative aspect-square rounded-[20px] overflow-hidden bg-[#f2f4f5] border border-[#ebebeb]/60">
             <img
-              src={productImages[selectedImageIdx] || productImages[0]}
+              src={productImages[selectedImageIdx] || productImages[0] || 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=600'}
               alt={product.title}
               referrerPolicy="no-referrer"
               onError={(e) => {
@@ -378,7 +395,7 @@ export const ProductDetail = () => {
             </div>
 
             {/* Variants Selector */}
-            {product.variants?.length > 0 && (
+            {Array.isArray(product.variants) && product.variants.length > 0 && (
               <div className="space-y-2">
                 <span className="text-xs font-semibold text-black tracking-tight-body">
                   Select Option: <strong className="text-[#5433eb]">{selectedVariant?.name || selectedVariant?.title || 'Standard'}</strong>
@@ -389,7 +406,7 @@ export const ProductDetail = () => {
                       key={v.id}
                       onClick={() => setSelectedVariant(v)}
                       className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${
-                        selectedVariant?.id === v.id
+                        (selectedVariant?.id || product.variants[0]?.id) === v.id
                           ? 'bg-[#5433eb] text-white shadow-violet-glow'
                           : 'bg-[#f2f4f5] text-black hover:bg-[#e4e7e9]'
                       }`}
