@@ -54,28 +54,50 @@ export const ProductDetail = () => {
 
   // Ultra-resilient product lookup
   const product = useMemo(() => {
-    if (!productSlug) return products[0] || MARKAZ_PRODUCTS_500[0];
-    const target = decodeURIComponent(productSlug).toLowerCase().trim();
+    if (!productSlug) return (products && products[0]) || MARKAZ_PRODUCTS_500[0];
+    
+    let target = '';
+    try {
+      target = decodeURIComponent(productSlug).toLowerCase().trim();
+    } catch {
+      target = String(productSlug).toLowerCase().trim();
+    }
+
     const catalog = (products && products.length > 0) ? products : MARKAZ_PRODUCTS_500;
     
-    // 1. Exact slug or ID match
-    let found = catalog.find((p) => p.slug?.toLowerCase() === target || p.id?.toLowerCase() === target);
+    // 1. Exact slug or ID or SKU match
+    let found = catalog.find((p) => 
+      p.slug?.toLowerCase() === target || 
+      p.id?.toLowerCase() === target ||
+      p.sku?.toLowerCase() === target
+    );
     if (found) return found;
 
-    // 2. Lookup in static 500 catalog
-    found = MARKAZ_PRODUCTS_500.find((p) => p.slug?.toLowerCase() === target || p.id?.toLowerCase() === target);
+    // 2. Static catalog lookup
+    found = MARKAZ_PRODUCTS_500.find((p) => 
+      p.slug?.toLowerCase() === target || 
+      p.id?.toLowerCase() === target ||
+      p.sku?.toLowerCase() === target
+    );
     if (found) return found;
 
-    // 3. Match numeric ID extracted from slug (e.g. -71 -> mkz-prod-71)
+    // 3. Match numeric ID extracted from slug (e.g. -71 -> mkz-p-71 or mkz-prod-71)
     const idMatch = target.match(/-(\d+)$/);
     if (idMatch) {
-      const numericId = `mkz-prod-${idMatch[1]}`;
-      found = catalog.find((p) => p.id === numericId) || MARKAZ_PRODUCTS_500.find((p) => p.id === numericId);
+      const num = idMatch[1];
+      const pId1 = `mkz-p-${num}`;
+      const pId2 = `mkz-prod-${num}`;
+      found = catalog.find((p) => p.id === pId1 || p.id === pId2) || MARKAZ_PRODUCTS_500.find((p) => p.id === pId1 || p.id === pId2);
       if (found) return found;
     }
 
     // 4. Partial slug match
     found = catalog.find((p) => p.slug?.toLowerCase().includes(target) || target.includes(p.slug?.toLowerCase()));
+    if (found) return found;
+
+    // 5. Title keyword search
+    const cleanTarget = target.replace(/-/g, ' ');
+    found = catalog.find((p) => p.title?.toLowerCase().includes(cleanTarget) || cleanTarget.includes(p.title?.toLowerCase()));
     if (found) return found;
 
     return catalog[0] || MARKAZ_PRODUCTS_500[0];

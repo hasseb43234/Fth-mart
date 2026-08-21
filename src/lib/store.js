@@ -194,16 +194,17 @@ export const useStore = create(
           const newItem = {
             id: `cart-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
             productId: product.id,
+            productSlug: product.slug || product.id,
             variantId: variantId,
-            variantTitle: variant?.title || 'Standard',
+            variantTitle: variant?.title || variant?.name || 'Standard',
             title: product.title,
             price: variant?.price || product.price,
-            costPrice: variant?.costPrice || product.costPrice || (product.price * 0.5),
+            costPrice: variant?.costPrice || product.supplierCost || (product.price * 0.5),
             quantity: quantity,
-            image: (variant?.imageIndex !== undefined && product.images[variant.imageIndex]) ? product.images[variant.imageIndex] : (product.images[0] || ''),
+            image: (variant?.imageIndex !== undefined && product.images?.[variant.imageIndex]) ? product.images[variant.imageIndex] : (product.images?.[0] || ''),
             sku: variant?.sku || product.sku,
             selected: true,
-            sellerName: product.seller?.name || 'FTH Mart Official'
+            sellerName: product.supplier?.name || product.seller?.name || 'Markaz Verified Supplier'
           };
           set({ cart: [...cart, newItem] });
         }

@@ -91,7 +91,7 @@ export const CartDrawer = () => {
                 />
                 <div className="flex-1 min-w-0">
                   <Link
-                    to={`/p/${item.productId}`}
+                    to={`/p/${item.productSlug || item.productId}`}
                     onClick={() => setCartDrawerOpen(false)}
                     className="text-xs font-bold text-slate-900 hover:text-sky-600 line-clamp-1"
                   >

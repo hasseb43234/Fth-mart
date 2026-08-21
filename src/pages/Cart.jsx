@@ -159,7 +159,7 @@ export const Cart = () => {
                     {item.sellerName || 'FTH Verified Store'}
                   </div>
                   <Link
-                    to={`/p/${item.productId}`}
+                    to={`/p/${item.productSlug || item.productId}`}
                     className="text-xs sm:text-sm font-semibold text-black hover:text-[#5433eb] line-clamp-2 transition-colors mt-0.5 tracking-tight-body"
                   >
                     {item.title}

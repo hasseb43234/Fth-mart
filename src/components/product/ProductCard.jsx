@@ -1,10 +1,11 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../../lib/store';
-import { Heart, ShoppingCart, Star, Zap, Check } from 'lucide-react';
+import { Heart, ShoppingCart, Star, Zap } from 'lucide-react';
 import { formatPKR } from '../../lib/formatters';
 
 export const ProductCard = ({ product, layout = 'grid' }) => {
+  const navigate = useNavigate();
   const addToCart = useStore((state) => state.addToCart);
   const toggleWishlist = useStore((state) => state.toggleWishlist);
   const isInWishlist = useStore((state) => state.isInWishlist(product.id));
@@ -13,6 +14,14 @@ export const ProductCard = ({ product, layout = 'grid' }) => {
     product.compareAtPrice && product.compareAtPrice > product.price
       ? Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100)
       : 0;
+
+  const handleCardClick = (e) => {
+    // If user clicked a button or interactive child that stopped propagation, do nothing
+    if (e.target.closest('button') || e.target.closest('a')) {
+      return;
+    }
+    navigate(`/p/${product.slug}`);
+  };
 
   const handleQuickAdd = (e) => {
     e.preventDefault();
@@ -28,7 +37,10 @@ export const ProductCard = ({ product, layout = 'grid' }) => {
 
   if (layout === 'list') {
     return (
-      <div className="bg-white rounded-[28px] p-4 shadow-pillow hover:shadow-elevated transition-all duration-300 flex flex-col sm:flex-row gap-5 group">
+      <div
+        onClick={handleCardClick}
+        className="bg-white rounded-[28px] p-4 shadow-pillow hover:shadow-elevated transition-all duration-300 flex flex-col sm:flex-row gap-5 group cursor-pointer"
+      >
         <Link to={`/p/${product.slug}`} className="relative sm:w-52 aspect-square flex-shrink-0 overflow-hidden rounded-[20px] bg-[#f2f4f5]">
           <img
             src={product.images?.[0] || 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=400&auto=format&fit=crop&q=80'}
@@ -132,7 +144,10 @@ export const ProductCard = ({ product, layout = 'grid' }) => {
 
   // Grid Layout: Floating 28px Card
   return (
-    <div className="bg-white rounded-[28px] p-3 shadow-pillow hover:shadow-elevated transition-all duration-300 flex flex-col justify-between group overflow-hidden relative">
+    <div
+      onClick={handleCardClick}
+      className="bg-white rounded-[28px] p-3 shadow-pillow hover:shadow-elevated transition-all duration-300 flex flex-col justify-between group overflow-hidden relative cursor-pointer"
+    >
       {/* Top Image Stage with 20px inner radius creating subtle white border frame */}
       <div>
         <Link to={`/p/${product.slug}`} className="relative block aspect-square overflow-hidden rounded-[20px] bg-[#f2f4f5]">
